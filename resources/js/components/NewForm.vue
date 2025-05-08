@@ -1,0 +1,239 @@
+<script setup>
+import { defineEmits } from "vue";
+import SelectStatus from './SelectStatus.vue';
+const $emit = defineEmits(["closeForm","renderTimeDate"]);
+</script>
+<template>
+    <div id="edit-form">
+        <button class="f-right" @click="$emit('closeForm')">x</button>
+        <h5>Add/Edit Item</h5>      
+        <table class="table-edit">
+            <tbody>
+                <tr>
+                    <td>Exp. Id</td>
+                    <td><input type="number" name="exp_number" @change="change_value" :value="state.exp_number"/></td>
+                </tr>
+                <tr>
+                    <td>Title</td>
+                    <td><input type="text" name="title" @change="change_value" :value="state.title"/></td>
+                </tr>
+                <tr>
+                    <td>Description</td>
+                    <td>
+                        <textarea name="description" @change="change_value" :value="state.description"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Date</td>
+                    <td>
+                        <input type="date"  name="date" @change="change_value" :value="state.date" />
+                        <input type="time"  name="time" @change="change_value" :value="state.time" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>Status</td>
+                    <td>
+                        <SelectStatus :statuses="statuses" v-model="state.status" @change="change_value" :value="state.status"></SelectStatus>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Source</td>
+                    <td><input type="text" name="source" @change="change_value"  :value="state.source"/></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <button class="btn f-left" @click="save">Save</button>
+                        <button class="btn bred f-right" @click="deleteTask">Delete</button>
+                    </td>                    
+                </tr>
+            </tbody>
+        </table>
+        <ul class="subitems">
+            <li v-for="(item, index) in subitems" :key="index" v-bind:class = "(state.id==item.id)?'active_subitem':''" @click="changeActiveSubitem(item.id)">
+                <div>
+                    <span>{{item.id}}</span>
+                    <span>{{item.title}}</span>  
+                    <span class="subitem-datetime">
+                        <div>{{Helper.renderTimeDate(item.datetime).split(' ')[0]}}</div>                        
+                        <div class="nowrap">{{Helper.renderTimeDate(item.datetime).split(' ')[1]}}</div>
+                    </span> 
+                    <span>{{statuses[item.status]}}</span>               
+                </div>                
+                <div>{{item.description}}</div>
+            </li>
+            <li v-if="subitems.length==0">No subitems</li>
+        </ul>
+    </div>
+</template>
+
+<script>
+
+import axiosPro from '../components/axiosPro.js';
+import Helper from '../components/helper.js';
+export default {
+    name: 'NewForm',
+    props: ['editItem','statuses','subitems'],         
+    state: {},     
+   
+    data() {
+        const editItem = this.editItem;        
+        let exp_number = editItem.exp_number;
+        let title = editItem.title;
+        let status = editItem.status;
+        let source = editItem.source;
+
+        if(this.subitems.length > 0) {
+            exp_number = this.subitems[0].exp_number;
+            title = this.subitems[0].title;
+            status = this.subitems[0].status;
+            source = this.subitems[0].source;
+        }
+        console.log('editItem',this.editItem, editItem.exp_number);
+        return {            
+            'state': {
+                id: 0,
+                exp_number: exp_number,
+                title: title,
+                description: '',
+                status: status,
+                source: source,                            
+                date:Helper.date(),
+                time:Helper.time(),
+            },            
+        }
+    },
+    methods: {        
+        changeActiveSubitem(id) {             
+            this.state = this.subitems.find((item) => item.id == id);
+            this.state.date = this.state.datetime.split(' ')[0];
+            this.state.time = this.state.datetime.split(' ')[1];            
+        },
+        deleteTask() { 
+            axiosPro.delete('/task', {id:this.state.id}, () => {                                
+                this.$emit('closeForm');
+                this.$emit('search');
+            }); 
+        },
+        change_value(e) {
+            console.log('change_value', e.target.name, e.target.value);
+            this.state[e.target.name] = e.target.value;                 
+        },
+        save() {       
+            let args = this.state;
+            args.datetime = args.date + ' ' + args.time;
+            delete args.date;
+            delete args.time;
+            console.log('save', args);
+            axiosPro.post('/task', args, () => { 
+                this.$emit('closeForm');
+                this.$emit('search');
+            });                        
+        },
+    },
+    components: {
+        SelectStatus
+    },
+
+}
+</script>
+<style scoped>
+.subitems{
+    white-space: inherit;
+    overflow-y: auto;
+    height: 48%;
+    margin:5px;
+}
+.subitems li{
+
+    border-bottom:solid #ccc 1px;
+}
+.subitems li div span{
+    display: inline-block;
+    width: 25%;    
+    vertical-align: top;
+}
+.subitems li div span:first-child{
+    width: 10%;
+}
+.subitems li div span:nth-child(2){
+    width: 40%;
+}
+.subitem-datetime{
+    font-size: 0.8em;
+    line-height: 1;
+}
+.active_subitem{
+    background: floralwhite;
+}
+#edit-form{
+    border:solid black 1px;
+    width:50vw;
+    left:25vw;
+    position:absolute;    
+    top:5vh;
+    z-index: 1;
+    background: #fff;    
+    height:90vh
+}
+#edit-form h5{
+    background: dimgray;
+    color:#FFF;
+    text-align: center;
+}
+.table-edit input[type="text"],
+.table-edit input[type="number"],
+.table-edit input[type="date"],
+.table-edit textarea{
+    border:solid #ccc 1px;
+    margin-bottom: 1vh;
+}
+.table-edit input[type="date"]{
+    width: 40%;
+}
+.table-edit{
+    margin:1vh;
+
+}
+
+.table-edit td{
+    text-align: left;
+}
+.f-left{
+    float:left;
+}
+.f-right{
+    float:right;
+}
+.bred{
+    background: red;
+}
+.nowrap{
+    white-space: nowrap;
+}
+@media only screen and (max-width: 600px) {     
+    #edit-form{
+        width:90vw;
+        left:5vw;
+    }
+    #edit-form table{
+        width:calc(100% - 2vh);
+    }
+    #edit-form table tr td:first-child{
+        width:30%;
+    }
+    #edit-form table tr td:last-child input{
+        width:90%;
+    }
+    #edit-form table tr td:last-child input[type="date"]{
+        width:50%;
+    }
+    #edit-form table tr td:last-child input[type="time"]{
+        width:30%;
+        margin-left:10px;
+    }
+    #edit-form table tr td:last-child textarea{
+        width:90%;
+        height:10vh;
+    }
+}
+</style>
