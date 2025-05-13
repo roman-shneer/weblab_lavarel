@@ -3,7 +3,6 @@ import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
 import path from 'path';
 
-
 export default defineConfig({
     plugins: [
         laravel({
@@ -17,15 +16,21 @@ export default defineConfig({
             template: {
                 transformAssetUrls: {
                     base: null,
-                    includeAbsolute: false,
+                    includeAbsolute: true,
                 },
             },
         }),
+        /* basicSsl()*/
     ],
     resolve: {
         alias: {
             vue: 'vue/dist/vue.esm-bundler.js',
             ziggy: path.resolve('vendor/tightenco/ziggy/dist'),
         },
+    },
+    server: {
+        cors: true, // Enable CORS
+        origin: 'https://weblab_lavarel.test:5173', // Set the origin      
+
     },
 });

@@ -1,0 +1,67 @@
+mysqlAES javascript Class v1.0.0
+--------------------------------
+Copyright (c) 2013 JoungKyun.Kim <http://oops.org>
+License: GPLv3
+
+
+This program support AES 128/192/256 encrypt/decrypt and
+this is comaptible with mysql AES 128bit.
+
+If key length is 128bit, is compatible with native AES_ENCRYPT
+and AES_DECRYPT function of mysql
+
+This program is base on js-mcrypt v1.1
+<https://code.google.com/p/js-mcrypt/>
+
+
+Support Method:
+---------------
+
+    Encrypt   Return encrypted data
+    Decrypt   Return decrypt data
+    hex       Return a hexadecimal representation of a decimal or string value
+              The formula for the length of the encrypted hexadecimal data is
+              as follows:
+
+              LOS length of original data
+              LOH length of hexadecimal data
+
+              LOH = LOS / 16 * 32 + 32
+
+    unhex     Return a string containing hex representation of a number
+
+
+Example:
+--------
+
+<!-- script type="text/javascript" src="mysqlAES/phpjs.js"></script -->
+<!-- script type="text/javascript" src="mysqlAES/rijndael.js"></script -->
+<!-- script type="text/javascript" src="mysqlAES/mysqlAES.js"></script -->
+<script type="text/javascript" src="mysqlAES/mysqlAES-min.js"></script>
+
+<script type="text/javascript">
+    var orig = '123123 I\'m a bod and you are a girl';
+    var key128 = '0123456789012345';                 // 16byte
+    var key192 = '012345678901234567890123';         // 24byte
+    var key256 = '01234567890123456789012345678901'; // 32byte
+
+    document.write ('Origin Data is \'' + orig + "'<br>\n");
+    document.write ('Origin LEN  is ' + orig.length + "<br><br>\n");
+
+    var keys = [ key128, key192, key256 ];
+    for ( var keybit in keys ) {
+
+        document.write ("Test 128bit ..<br>\n");
+        document.write ('Encrypt Value => ');
+
+        var enc = mysqlAES.hex (mysqlAES.Encrypt (orig, keys[keybit]));
+
+        document.write (enc + "<br>\n");
+        document.write ('Encrypt Length => ' + enc.length + "<br>\n");
+        document.write ('Decrypt Value => ');
+
+        var dec = mysqlAES.Decrypt (mysqlAES.unhex (enc), keys[keybit]);
+
+        document.write (dec + "<br><br>\n");
+    }
+</script>

@@ -1,20 +1,32 @@
-<script setup lang="ts">  
-//import { ref } from 'vue';  
-//import { Link } from '@inertiajs/vue3';  
-import { render } from 'vue';
+<script setup lang="ts">
 import NewForm from '../components/NewForm.vue';
 import SearchForm from '../components/SearchForm.vue';
-import axiosPro from '../components/axiosPro.js';
-import Helper from '../components/helper.js';
+import EncText from '../components/encText.vue';
+import Header from '../components/Header.vue';
+
+import axiosPro from '../libraries/axiosPro';
+import Helper from '../libraries/helper';
+import Enc from "../libraries/Enc";
 </script>
 <script lang="ts">
+
 export default {
-props: {
-    
-    statuses: Array
-},
+    props: {
+
+        statuses: Array,
+        encrypted: Boolean,
+        encrypted_example: String
+    },
     data() {
-    return {
+        let encrypt_pass = localStorage.getItem('encrypt_pass');
+        if (encrypt_pass == null) {
+            encrypt_pass = '';
+        }
+        let encryptionStatus = this.encrypted ? 1 : 0;
+        if (encryptionStatus == 1 && encrypt_pass.length > 0 && this.encrypted_example && this.encrypted_example.length > 0) {
+            encryptionStatus = (Enc.decrypt(this.encrypted_example, encrypt_pass) == 'test') ? 2 : 1;
+        }
+        return {
             max_id: 0,
             items: [] as Array<{ id: number;[key: string]: any }>,
             subitems: [] as any,
@@ -23,19 +35,22 @@ props: {
                 title: '',
                 date: '',
                 status: '0',
-                source: '',                
-            },          
+                source: '',
+            },
             message: '',
-            showNewForm: false,
-            showStatusForm: false,            
-            editItem: {}
-    };
-},
+            flashMessage: '',
+            showForm: false,
+            editItem: {},
+            encrypt_pass: encrypt_pass,
+            encrypt_columns: ['title', 'description', 'source'],
+            encryptionStatus: encryptionStatus
+        };
+    },
     methods: {
 
-        renderStatus(status:number) {
+        renderStatus(status: number) {
 
-            if (typeof this.statuses!='undefined' && typeof this.statuses[status] != 'undefined') {
+            if (typeof this.statuses != 'undefined' && typeof this.statuses[status] != 'undefined') {
                 return this.statuses[status];
             } else {
                 return "unknow " + status;
@@ -43,28 +58,53 @@ props: {
         },
 
         setItems(items: any) {
-            console.log('setItems', items);
             this.items = items;
         },
 
-        setMax(maxnum:number) {
+        setMax(maxnum: number) {
             this.max_id = maxnum;
         },
 
         closeForm() {
             this.editItem = {};
             this.subitems = [];
-            this.showNewForm = false;
+            this.showForm = false;
         },
 
-        editItemForm(exp_number:number) {            
-            axiosPro.get('/tasks', { exp_number: exp_number }, (response: any) => {               
-                this.editItem = response.data.items[0];
-                this.subitems = response.data.items;
-                this.showNewForm = true;
+        saveForm(args: any) {
+            const params = Object.assign({}, args);
+            if (this.is_encryptable()) {
+                this.encrypt_columns.forEach(k => {
+                    params[k] = Enc.encrypt(params[k], this.encrypt_pass);
+                });
+            }
+            axiosPro.post('/task', params, () => {
+                this.closeForm();
+                this.search();
             });
         },
-        
+
+        is_encryptable() {          
+            return this.encryptionStatus == 2;
+        },
+
+        editItemForm(exp_number: number) {
+            axiosPro.get('/tasks', { exp_number: exp_number }, (response: any) => {
+                if (this.is_encryptable()) {
+                    response.data.items.forEach((item: any, ind: number) => {
+                        this.encrypt_columns.forEach(key => {
+                            response.data.items[ind][key] = Enc.decrypt(item[key], this.encrypt_pass);
+                        });
+                    });
+                }
+                this.editItem = response.data.items[0];
+                this.subitems = response.data.items;
+                this.showForm = true;
+
+
+            });
+        },
+
         addNewForm() {
             this.editItem = {
                 exp_number: this.max_id,
@@ -74,23 +114,25 @@ props: {
                 source: 0,
                 status: 0
             }
-            this.showNewForm = true
+            this.showForm = true
         },
 
         setDate(datetime: string) {
-            this.searchFormAttributes.date = Helper.date(datetime);            
+            this.searchFormAttributes.date = Helper.date(datetime);
         },
 
-        setStatus(status:string) {
-            this.searchFormAttributes.status = status;            
+        setStatus(status: string) {
+            this.searchFormAttributes.status = status;
         },
 
-        setId(exp_number:string) {
+        setId(exp_number: string) {
             this.searchFormAttributes.exp_number = exp_number;
         },
 
-        setName(title:string) {
-            this.searchFormAttributes.title = title;
+        setName(evt: any) {
+            if (this.encryptionStatus!=1) {
+                this.searchFormAttributes.title = evt.target.innerText;
+            }
         },
 
         search() {
@@ -100,58 +142,120 @@ props: {
             } else {
                 this.message = "searching..."
             }
-            
-            axiosPro.get('/tasks_grouped', args,(response:any) => {
+
+            const params = Object.assign({}, args);
+            if (this.is_encryptable()) {
+                if (params.title.length > 0) {
+                    params.title = Enc.encrypt(params.title, this.encrypt_pass);
+                }
+                if (params.source.length > 0) {
+                    params.source = Enc.encrypt(params.source, this.encrypt_pass);
+                }
+            }
+            axiosPro.get('/tasks_grouped', params, (response: any) => {
                 this.max_id = response.data.max_id.toString();
                 this.message = "found " + response.data.items.length + " items";
-                this.items = response.data.items;                               
+                this.items = response.data.items;
             });
         },
+
+        setFlashMessage(msg: string) {
+            this.flashMessage = msg;
+            setTimeout(() => {
+                this.flashMessage = '';
+            }, 5000)
+        },
+
+        setEncryptPass(password: string) {
+            if (password == '') {
+                this.encrypt_pass = password;
+                localStorage.setItem('encrypt_pass', this.encrypt_pass);
+                this.encryptionStatus = 1;
+                return;
+            }
+            
+            if (this.encrypted_example) {
+                if (Enc.decrypt(this.encrypted_example, password) == 'test') {
+                    console.log('set correct password', password, this.encrypted_example, Enc.decrypt(this.encrypted_example, this.encrypt_pass));
+                    this.encrypt_pass = password;
+                    this.encryptionStatus = 2;
+                    localStorage.setItem('encrypt_pass', this.encrypt_pass);
+                } else {
+                    this.encryptionStatus = 1;
+                    this.setFlashMessage('Its wrong password, cannot encode!')
+                }
+
+            }
+        },
+
     },
-    
+
     components: {
-        NewForm,       
+        EncText,
+        Header,
+        NewForm,
         SearchForm
     },
-        
-    mounted() {       
-        this.search()              
+
+    mounted() {
+        this.search();
     }
 }
 </script>
-<template>  
+<template>
+    <Header :encrypt_pass="encrypt_pass" :encryptionStatus="encryptionStatus" @setEncryptPass="setEncryptPass"></Header>
+    <div v-if="flashMessage.length > 0" class="flashMessage">{{ flashMessage }}</div>
     <div class="items-list">
-    <h1>Web Lab</h1>
-    <SearchForm :statuses="statuses" :searchFormAttributes="searchFormAttributes" @search="search"/>
-    <NewForm :editItem="editItem" :subitems="subitems" :statuses="statuses" v-if="showNewForm"  @closeForm="closeForm" @search="search" />
-    <br/>
-    <div>{{message}}</div>
-    <button @click="addNewForm" class="btn">New experiment</button>
-    <table :border="1" id="list-table">
-    <tbody>
-        <tr>
-            <th>#</th>
-            <th>Date</th>
-            <th>Title</th>       
-            <th>Status</th>
-            
-            <th>Next Id:{{max_id}}</th>
-        </tr>
-        <tr v-for="item in items" v-bind:key="item.id">
-            <td><a href="javascript://"  @click="setId(item.exp_number)">{{item.exp_number}} ({{item.amount}})</a></td>
-            <td><a href="javascript://" @click="setDate(item.datetime)">{{Helper.renderTimeDate(item.datetime)}}</a></td>
-            <td><a href="javascript://"  @click="setName(item.title)">{{item.title}}</a></td>                     
-            <td><a href="javascript://"  @click="setStatus(item.status)">{{renderStatus(item.status)}}</a></td>            
-            <td><a href="javascript://"  @click="editItemForm(item.exp_number)">edit</a></td>
-        </tr> 
-    </tbody>           
-    </table>
+        <SearchForm :statuses="statuses" :searchFormAttributes="searchFormAttributes" @search="search" />
+        <NewForm :editItem="editItem" :subitems="subitems" :statuses="statuses" v-if="showForm" @closeForm="closeForm"
+            @search="search" @saveForm="saveForm" />
+        <br />
+        <div>{{ message }}</div>
+        <button @click="addNewForm" class="btn">New experiment (Next Exp. Id: {{ max_id }})</button>
+        <table :border="1" id="list-table">
+            <tbody>
+                <tr>
+                    <th>#</th>
+                    <th>Date</th>
+                    <th>Title</th>
+                    <th>Status</th>
 
-    </div> 
+                    <th>&nbsp;</th>
+                </tr>
+                <tr v-for="item in items" v-bind:key="item.id">
+                    <td><a href="javascript://" @click="setId(item.exp_number)">                        
+                        <EncText :val="item.exp_number"  :encryptionStatus="encryptionStatus"></EncText>
+                    </a></td>
+                    <td><a href="javascript://" @click="setDate(item.datetime)">                        
+                        <EncText :val="item.datetime"  :encryptionStatus="encryptionStatus"></EncText>
+                    </a></td>
+                    <td><a href="javascript://" @click="setName">
+                            <EncText :val="item.title"  :encryptionStatus="encryptionStatus" :encrypt_pass="encrypt_pass"></EncText>
+                        </a></td>
+                    <td><a href="javascript://" @click="setStatus(item.status)">
+                        <EncText :val="renderStatus(item.status)"  :encryptionStatus="encryptionStatus"></EncText>                        
+                    </a></td>
+                    <td class="align-right">
+                        <a href="javascript://" @click="editItemForm(item.exp_number)" class="clickable" v-if="encryptionStatus!=1">
+                            <span class="material-symbols-outlined">settings</span>
+                            ({{ item.amount }})
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
 </template>
 <style>
-.btn{
-    background: #4CAF50; /* Green */
+body {
+    padding: 0;
+    margin: 0;
+}
+
+.btn {
+    background: #4CAF50;
+    /* Green */
     border: none;
     color: white;
     padding: 3px 15px;
@@ -166,31 +270,58 @@ props: {
 }
 </style>
 <style scoped>
-    .items-list h1{
-        text-align: center;
-        background: dimgray;
-        color: white;
-    }
-    #list-table{
-        width:100%;
-        
-        margin:1vw;
-        border-collapse: collapse;
-        font-size: 150%;
-    }
-    #list-table tr{
-        background: #f2f2f2;
-        border-bottom: solid 1px #ddd;
-    }
-     #list-table th{
-        text-align: left;
-     }
-    @media only screen and (max-width: 600px) {        
-        #list-table{
-            font-size: 100%;
-            
-        }
-       
+.flashMessage {
+    border: solid red 1px;
+    padding: 1em;
+    position: fixed;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    left: 50%;
+    background: brown;
+    color: white;
+    font-weight: bold;
+    border-radius: 1em;
+    box-shadow: 1px 1px 5px #888888;
+
+}
+
+.items-list {
+    margin-top: 30px;
+}
+
+#list-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 150%;
+}
+
+#list-table tr {
+    background: #f2f2f2;
+    border-bottom: solid 1px #ddd;
+}
+
+#list-table th {
+    text-align: left;
+    padding: 1px;
+}
+
+#list-table td {
+    padding: 1px;
+}
+
+.clickable {
+    color: blue;
+}
+
+.align-right {
+    text-align: right;
+}
+
+@media only screen and (max-width: 600px) {
+    #list-table {
+        font-size: 100%;
+
     }
 
+}
 </style>

@@ -5,22 +5,22 @@ const $emit = defineEmits(["closeForm","renderTimeDate"]);
 </script>
 <template>
     <div id="edit-form">
-        <button class="f-right" @click="$emit('closeForm')">x</button>
+        <button class="f-right material-symbols-outlined color-w" @click="$emit('closeForm')">close</button>
         <h5>Add/Edit Item</h5>      
         <table class="table-edit">
             <tbody>
                 <tr>
                     <td>Exp. Id</td>
-                    <td><input type="number" name="exp_number" @change="change_value" :value="state.exp_number"/></td>
+                    <td><input type="text" name="exp_number" @change="change_value" :value="state.exp_number" class="input"/></td>
                 </tr>
                 <tr>
                     <td>Title</td>
-                    <td><input type="text" name="title" @change="change_value" :value="state.title"/></td>
+                    <td><input type="text" name="title" @change="change_value" :value="state.title" class="input"/></td>
                 </tr>
                 <tr>
                     <td>Description</td>
                     <td>
-                        <textarea name="description" @change="change_value" :value="state.description"></textarea>
+                        <textarea name="description" @change="change_value" :value="state.description" class="input"></textarea>
                     </td>
                 </tr>
                 <tr>
@@ -38,12 +38,12 @@ const $emit = defineEmits(["closeForm","renderTimeDate"]);
                 </tr>
                 <tr>
                     <td>Source</td>
-                    <td><input type="text" name="source" @change="change_value"  :value="state.source"/></td>
+                    <td><input type="text" name="source" @change="change_value"  :value="state.source" class="input"/></td>
                 </tr>
                 <tr>
                     <td colspan="2">
                         <button class="btn f-left" @click="save">Save</button>
-                        <button class="btn bred f-right" @click="deleteTask">Delete</button>
+                        <button class="btn bred f-right" @click="deleteTask" v-if="state.id>0">Delete</button>
                     </td>                    
                 </tr>
             </tbody>
@@ -52,28 +52,34 @@ const $emit = defineEmits(["closeForm","renderTimeDate"]);
             <li v-for="(item, index) in subitems" :key="index" v-bind:class = "(state.id==item.id)?'active_subitem':''" @click="changeActiveSubitem(item.id)">
                 <div>
                     <span>{{item.id}}</span>
-                    <span>{{item.title}}</span>  
+                    <span>
+                        {{item.title}}                
+                    </span>  
                     <span class="subitem-datetime">
                         <div>{{Helper.renderTimeDate(item.datetime).split(' ')[0]}}</div>                        
                         <div class="nowrap">{{Helper.renderTimeDate(item.datetime).split(' ')[1]}}</div>
                     </span> 
                     <span>{{statuses[item.status]}}</span>               
                 </div>                
-                <div>{{item.description}}</div>
+                <div class="pre">
+                    {{item.description}}
+                </div>
             </li>
             <li v-if="subitems.length==0">No subitems</li>
         </ul>
     </div>
+    <div class="dark-layer"></div>
 </template>
 
 <script>
 
-import axiosPro from '../components/axiosPro.js';
-import Helper from '../components/helper.js';
+import axiosPro from '../libraries/axiosPro';
+import Helper from '../libraries/helper';
 export default {
     name: 'NewForm',
     props: ['editItem','statuses','subitems'],         
     state: {},     
+    inheritAttrs: false,
    
     data() {
         const editItem = this.editItem;        
@@ -82,13 +88,14 @@ export default {
         let status = editItem.status;
         let source = editItem.source;
 
-        if(this.subitems.length > 0) {
+        if (this.subitems.length > 0) {
+            console.log('data', this.subitems[0].title);
             exp_number = this.subitems[0].exp_number;
             title = this.subitems[0].title;
             status = this.subitems[0].status;
             source = this.subitems[0].source;
         }
-        console.log('editItem',this.editItem, editItem.exp_number);
+        
         return {            
             'state': {
                 id: 0,
@@ -98,8 +105,9 @@ export default {
                 status: status,
                 source: source,                            
                 date:Helper.date(),
-                time:Helper.time(),
+                time: Helper.time(),                
             },            
+            encryptableVars:['title', 'description', 'source']
         }
     },
     methods: {        
@@ -115,32 +123,34 @@ export default {
             }); 
         },
         change_value(e) {
-            console.log('change_value', e.target.name, e.target.value);
             this.state[e.target.name] = e.target.value;                 
         },
         save() {       
             let args = this.state;
             args.datetime = args.date + ' ' + args.time;
             delete args.date;
-            delete args.time;
-            console.log('save', args);
-            axiosPro.post('/task', args, () => { 
-                this.$emit('closeForm');
-                this.$emit('search');
-            });                        
+            delete args.time;            
+            this.$emit('saveForm', args);
         },
     },
     components: {
-        SelectStatus
+        SelectStatus,
     },
+    
 
 }
 </script>
 <style scoped>
+.input{
+    padding:1px 5px;
+}
+.color-w{
+    color:#ffffff;
+}
 .subitems{
     white-space: inherit;
     overflow-y: auto;
-    height: 48%;
+    height: 45%;
     margin:5px;
 }
 .subitems li{
@@ -169,7 +179,7 @@ export default {
     border:solid black 1px;
     width:50vw;
     left:25vw;
-    position:absolute;    
+    position:fixed;    
     top:5vh;
     z-index: 1;
     background: #fff;    
@@ -183,13 +193,19 @@ export default {
 .table-edit input[type="text"],
 .table-edit input[type="number"],
 .table-edit input[type="date"],
-.table-edit textarea{
+.table-edit textarea,
+.table-edit select{
     border:solid #ccc 1px;
     margin-bottom: 1vh;
 }
 .table-edit input[type="date"]{
     width: 40%;
 }
+
+.table-edit input[type="time"]{
+    width: 35%;
+}
+
 .table-edit{
     margin:1vh;
 
@@ -209,6 +225,20 @@ export default {
 }
 .nowrap{
     white-space: nowrap;
+}
+.pre{
+    white-space: pre-wrap;
+    padding:5px 0px 5px 5px;
+}
+.dark-layer{
+    background: gray;
+    opacity: 0.7;
+    filter: blur(10px);
+    position: fixed;
+    top:0;
+    left:0;
+    width:100vw;
+    height:100vh;
 }
 @media only screen and (max-width: 600px) {     
     #edit-form{

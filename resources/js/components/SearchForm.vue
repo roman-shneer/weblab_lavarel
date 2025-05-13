@@ -2,28 +2,28 @@
     <div>
         <span class="search-cell">
             <label>Exp. Id:</label>
-            <input type="text" name="exp_number" v-model="searchFormAttributes.exp_number"/>
-            <button class="search-x" @click="searchFormAttributes.exp_number = '';">x</button>
-        </span>
+            <input type="number" name="exp_number" v-model="searchFormAttributes.exp_number"/>
+            <button class="search-x material-symbols-outlined" @click="searchFormAttributes.exp_number = '';">close</button>
+        </span>            
         <span class="search-cell">
             <label>Title:</label>
             <input type="text" name="title" v-model="searchFormAttributes.title"/>
-            <button class="search-x" @click="searchFormAttributes.title = '';">x</button>
+            <button class="search-x material-symbols-outlined" @click="searchFormAttributes.title = '';">close</button>
         </span>
         <span class="search-cell">
             <label>Date:</label> 
             <input type="date" name="date" v-model="searchFormAttributes.date"/>
-            <button class="search-x" @click="searchFormAttributes.date = '';">x</button>
+            <button class="search-x material-symbols-outlined" @click="searchFormAttributes.date = '';">close</button>
         </span>
         <span class="search-cell">
             <label>Status:</label> 
-            <SelectStatus :statuses="statuses" :value="searchFormAttributes.status" v-model="searchFormAttributes.status" @change="changeStatus"/> 
-            <button class="search-x" @click="searchFormAttributes.status = 0;">x</button>          
+            <SelectStatus :statuses="statuses" :value="searchFormAttributes.status" v-model="searchFormAttributes.status" :css="'width:60%'" @change="changeStatus"/> 
+            <button class="search-x  material-symbols-outlined" @click="searchFormAttributes.status = 0;">close</button>          
         </span>
         <span class="search-cell">
             <label>Source:</label>
             <input type="text" name="source" v-model="searchFormAttributes.source"/>
-            <button class="search-x" @click="searchFormAttributes.source = '';">x</button>
+            <button class="search-x  material-symbols-outlined" @click="searchFormAttributes.source = '';">close</button>
         </span>
         <span class="search-cell">
             <button @click="search" class="btn search-btn">Search</button>
@@ -53,7 +53,6 @@ export default {
     },
     methods: {
         changeStatus(e: any) {         
-            console.log('changeStatus', e.target.value);
             this.searchFormAttributes.status = e.target.value;            
         },      
         search() {             
@@ -64,7 +63,6 @@ export default {
     components: {
         SelectStatus
     },
-   
 }
 </script>
 <style scoped>

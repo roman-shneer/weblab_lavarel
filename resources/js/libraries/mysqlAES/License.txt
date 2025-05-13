@@ -1,0 +1,5 @@
+mysqlAES is follows license.
+
+phpjs.js    : https://github.com/kvz/phpjs/blob/master/LICENSE.txt
+mysqlAES.js : GPLv2
+rijndael.js : GPLv2
