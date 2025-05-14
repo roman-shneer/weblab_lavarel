@@ -11,16 +11,23 @@ const $emit = defineEmits(["closeForm","renderTimeDate"]);
             <tbody>
                 <tr>
                     <td>Exp. Id</td>
-                    <td><input type="text" name="exp_number" @change="change_value" :value="state.exp_number" class="input"/></td>
+                    <td>
+                        <input type="text" name="exp_number" @change="change_value" :value="state.exp_number" class="input" placeholder="Numbers,comma separated"/>
+                        <div class="note">can be few, comma separated</div>
+                    </td>
                 </tr>
                 <tr>
                     <td>Title</td>
-                    <td><input type="text" name="title" @change="change_value" :value="state.title" class="input"/></td>
+                    <td>
+                        <input type="text" name="title" @change="change_value" :value="state.title" class="input"/>
+                        <div class="note">use short names</div>
+                    </td>
                 </tr>
                 <tr>
                     <td>Description</td>
                     <td>
                         <textarea name="description" @change="change_value" :value="state.description" class="input"></textarea>
+                        <div class="note">Full name and processes</div>
                     </td>
                 </tr>
                 <tr>
@@ -50,18 +57,17 @@ const $emit = defineEmits(["closeForm","renderTimeDate"]);
         </table>
         <ul class="subitems">
             <li v-for="(item, index) in subitems" :key="index" v-bind:class = "(state.id==item.id)?'active_subitem':''" @click="changeActiveSubitem(item.id)">
-                <div>
-                    <span>{{item.id}}</span>
+                <div>   
+                    <span class="subitem-datetime nowrap">
+                        {{Helper.renderTimeDate(item.datetime).split(' ')[0]}}                                              
+                        <div><b>{{Helper.renderTimeDate(item.datetime).split(' ')[1]}}</b></div>
+                    </span>                 
                     <span>
                         {{item.title}}                
-                    </span>  
-                    <span class="subitem-datetime">
-                        <div>{{Helper.renderTimeDate(item.datetime).split(' ')[0]}}</div>                        
-                        <div class="nowrap">{{Helper.renderTimeDate(item.datetime).split(' ')[1]}}</div>
-                    </span> 
+                    </span>                      
                     <span>{{statuses[item.status]}}</span>               
                 </div>                
-                <div class="pre">
+                <div class="description">
                     {{item.description}}
                 </div>
             </li>
@@ -149,8 +155,6 @@ export default {
 }
 .subitems{
     white-space: inherit;
-    overflow-y: auto;
-    height: 45%;
     margin:5px;
 }
 .subitems li{
@@ -159,14 +163,14 @@ export default {
 }
 .subitems li div span{
     display: inline-block;
-    width: 25%;    
+    width: 45%;  
     vertical-align: top;
 }
 .subitems li div span:first-child{
-    width: 10%;
+    width: 30%;
 }
-.subitems li div span:nth-child(2){
-    width: 40%;
+.subitems li div span:last-child{
+    width: 25%;
 }
 .subitem-datetime{
     font-size: 0.8em;
@@ -183,7 +187,8 @@ export default {
     top:5vh;
     z-index: 1;
     background: #fff;    
-    height:90vh
+    height:90vh;
+    overflow-y: auto;
 }
 #edit-form h5{
     background: dimgray;
@@ -203,16 +208,17 @@ export default {
 }
 
 .table-edit input[type="time"]{
-    width: 35%;
+    width: 40%;
 }
 
 .table-edit{
     margin:1vh;
-
+    margin:0 auto;
 }
 
 .table-edit td{
     text-align: left;
+    vertical-align: top;
 }
 .f-left{
     float:left;
@@ -226,9 +232,11 @@ export default {
 .nowrap{
     white-space: nowrap;
 }
-.pre{
+.description{
     white-space: pre-wrap;
     padding:5px 0px 5px 5px;
+    border-top:dashed #ccc 1px;
+    background: whitesmoke;
 }
 .dark-layer{
     background: gray;
@@ -239,6 +247,13 @@ export default {
     left:0;
     width:100vw;
     height:100vh;
+}
+.note{
+    color:#000;
+    font-size: 14px;
+    line-height: 1;
+    margin-bottom: 5px;
+    font-style: italic;
 }
 @media only screen and (max-width: 600px) {     
     #edit-form{
@@ -258,7 +273,7 @@ export default {
         width:50%;
     }
     #edit-form table tr td:last-child input[type="time"]{
-        width:30%;
+        width:32%;
         margin-left:10px;
     }
     #edit-form table tr td:last-child textarea{

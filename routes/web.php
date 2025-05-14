@@ -85,7 +85,6 @@ Route::delete(
 
 Auth::routes();
 
-#Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/home', function () {
     $uid = \Auth::id();
     if ($uid == null) {

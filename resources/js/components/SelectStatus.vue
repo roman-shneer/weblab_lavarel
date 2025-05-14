@@ -1,12 +1,12 @@
 <template>
-    <select name="status" @change="change_value"  :value="selectedIndex" :style="css">        
+    <select name="status" @change="change_value"  :value="selectedIndex" v-bind:class="cssClass">        
         <option v-for="status in statuses" v-bind:key="statuses.indexOf(status)" :value="statuses.indexOf(status)">{{status}}</option>
     </select>
 </template>
 <script>
 export default {
     name: 'SelectStatus',
-    props: ['statuses','css'],
+    props: ['statuses','cssClass'],
     data() {
         return {
             selectedIndex: 0, // Default to the first index
@@ -28,5 +28,11 @@ select {
     border-radius: 4px;
     border: 1px solid #ccc;
     font-size: 14px;
+}
+
+@media only screen and (max-width: 600px) {  
+    .search_select{
+        width:60%;
+    }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="search_box">
         <span class="search-cell">
             <label>Exp. Id:</label>
             <input type="number" name="exp_number" v-model="searchFormAttributes.exp_number"/>
@@ -17,7 +17,7 @@
         </span>
         <span class="search-cell">
             <label>Status:</label> 
-            <SelectStatus :statuses="statuses" :value="searchFormAttributes.status" v-model="searchFormAttributes.status" :css="'width:60%'" @change="changeStatus"/> 
+            <SelectStatus :statuses="statuses" :value="searchFormAttributes.status" v-model="searchFormAttributes.status" :cssClass="'search_select'" @change="changeStatus"/> 
             <button class="search-x  material-symbols-outlined" @click="searchFormAttributes.status = 0;">close</button>          
         </span>
         <span class="search-cell">
@@ -68,6 +68,16 @@ export default {
 <style scoped>
 .search-cell{
     margin-right: 2%;
+}
+.search-x{
+    padding:0 5px;
+    background: transparent;
+    border:0;
+    vertical-align: middle;
+    cursor: pointer;
+}
+.search_box{
+    text-align: center;
 }
 @media only screen and (max-width: 600px) {        
 

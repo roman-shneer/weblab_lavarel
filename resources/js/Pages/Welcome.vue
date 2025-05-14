@@ -187,6 +187,13 @@ export default {
 
             }
         },
+        cutDescription(text: string) { 
+            if (text.length > 50) { 
+                text = text.substring(0, 50) + '...';
+            }
+            console.log(text, text.length);
+            return text;
+        }
 
     },
 
@@ -210,40 +217,66 @@ export default {
         <NewForm :editItem="editItem" :subitems="subitems" :statuses="statuses" v-if="showForm" @closeForm="closeForm"
             @search="search" @saveForm="saveForm" />
         <br />
-        <div>{{ message }}</div>
-        <button @click="addNewForm" class="btn">New experiment (Next Exp. Id: {{ max_id }})</button>
-        <table :border="1" id="list-table">
-            <tbody>
-                <tr>
-                    <th>#</th>
-                    <th>Date</th>
-                    <th>Title</th>
-                    <th>Status</th>
+        <div class="middle-box">
+            <div class="middle-btn-box">
+                <span class="message">{{ message }}</span>
+                <button @click="addNewForm" class="btn new_btn">New experiment (Next Exp. Id: {{ max_id }})</button>    
+            </div>
+            <table :border="1" id="list-table">
+                <tbody>
+                    <tr>
+                        <th>#</th>
+                        <th>Date</th>
+                        <th>Title</th>
+                        <th class="mobile-hide">Description</th>
+                        <th class="mobile-hide">Source</th>
+                        <th>Status</th>
+                        <th>&nbsp;</th>
+                    </tr>
+                    <tr v-for="item in items" v-bind:key="item.id">
+                        <td>
+                            <a href="javascript://" @click="setId(item.exp_number)">                        
+                                <EncText :val="item.exp_number"  :encryptionStatus="encryptionStatus"></EncText>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="javascript://" @click="setDate(item.datetime)">                        
+                                <EncText :val="Helper.renderTimeDate(item.datetime, 'date')"  :encryptionStatus="encryptionStatus"></EncText>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="javascript://" @click="setName">
+                                <EncText :val="item.title"  :encryptionStatus="encryptionStatus" :encrypt_pass="encrypt_pass"></EncText>
+                            </a>
+                        </td>
+                        <td class="mobile-hide">
+                            <a href="javascript://">
+                                <EncText :val="cutDescription(item.description)"  :encryptionStatus="encryptionStatus" :encrypt_pass="encrypt_pass"></EncText>
+                            </a>
+                        </td>
+                       
+                        <td class="mobile-hide">
+                            <a href="javascript://" @click="">
+                                <EncText :val="item.source"  :encryptionStatus="encryptionStatus" :encrypt_pass="encrypt_pass"></EncText>                        
+                            </a>
+                        </td>
+                        <td>
+                            <a href="javascript://" @click="setStatus(item.status)">
+                                <EncText :val="renderStatus(item.status)"  :encryptionStatus="encryptionStatus"></EncText>                        
+                            </a>
+                        </td>
+                        <td class="align-right">
+                            <a href="javascript://" @click="editItemForm(item.exp_number)" class="clickable" v-if="encryptionStatus!=1">
+                                <span class="material-symbols-outlined">settings</span>
+                                ({{ item.amount }})
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
 
-                    <th>&nbsp;</th>
-                </tr>
-                <tr v-for="item in items" v-bind:key="item.id">
-                    <td><a href="javascript://" @click="setId(item.exp_number)">                        
-                        <EncText :val="item.exp_number"  :encryptionStatus="encryptionStatus"></EncText>
-                    </a></td>
-                    <td><a href="javascript://" @click="setDate(item.datetime)">                        
-                        <EncText :val="item.datetime"  :encryptionStatus="encryptionStatus"></EncText>
-                    </a></td>
-                    <td><a href="javascript://" @click="setName">
-                            <EncText :val="item.title"  :encryptionStatus="encryptionStatus" :encrypt_pass="encrypt_pass"></EncText>
-                        </a></td>
-                    <td><a href="javascript://" @click="setStatus(item.status)">
-                        <EncText :val="renderStatus(item.status)"  :encryptionStatus="encryptionStatus"></EncText>                        
-                    </a></td>
-                    <td class="align-right">
-                        <a href="javascript://" @click="editItemForm(item.exp_number)" class="clickable" v-if="encryptionStatus!=1">
-                            <span class="material-symbols-outlined">settings</span>
-                            ({{ item.amount }})
-                        </a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        </div>
+        
 
     </div>
 </template>
@@ -270,6 +303,14 @@ body {
 }
 </style>
 <style scoped>
+.message{
+    float:left;
+    margin-left:15px;
+}
+.new_btn{
+    float:right;
+    margin-right:15px;
+}
 .flashMessage {
     border: solid red 1px;
     padding: 1em;
@@ -288,8 +329,12 @@ body {
 .items-list {
     margin-top: 30px;
 }
-
+.middle-box{
+    width:60vw;
+    margin:0 auto;
+}
 #list-table {
+    margin-top: 15px;
     width: 100%;
     border-collapse: collapse;
     font-size: 150%;
@@ -308,7 +353,19 @@ body {
 #list-table td {
     padding: 1px;
 }
+#list-table td:nth-child(1){
+    width:5%;
+}
+#list-table td:nth-child(2){
+    width:10%;
+}
 
+#list-table td:nth-child(6){
+    width:5%;
+}
+#list-table td:last-child{
+    
+}
 .clickable {
     color: blue;
 }
@@ -316,11 +373,42 @@ body {
 .align-right {
     text-align: right;
 }
-
+.middle-btn-box{
+    height: 25px;
+}
 @media only screen and (max-width: 600px) {
+    .new_btn,.message{
+        margin:0;
+    }    
+    .middle-box{
+        width:100%;
+    }
     #list-table {
         font-size: 100%;
+        width: 100%;
+    }
+    .mobile-hide{
+        display: none;
+    }
 
+    
+    #list-table td:nth-child(1){
+        width:5%;
+    }
+    #list-table td:nth-child(2){
+        width:15%;
+    }
+    #list-table td:nth-child(3){
+        width:15%;
+    }
+    #list-table td:nth-child(4){
+        width:5%;
+    }
+    #list-table td:nth-child(5){
+        width:5%;
+    }
+    #list-table td:last-child{
+        width:10%;
     }
 
 }

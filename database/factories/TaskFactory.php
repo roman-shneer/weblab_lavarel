@@ -77,11 +77,12 @@ class TaskFactory extends Factory
             'exp_number',
             DB::raw('CAST(max(created_at) AS DATETIME) as datetime'),
                 DB::raw('count(id) as amount'),
-            DB::raw('SUBSTRING_INDEX(GROUP_CONCAT(title ORDER BY created_at DESC),",",1) as title'),
+            DB::raw('SUBSTRING_INDEX(GROUP_CONCAT(DISTINCT title ORDER BY created_at DESC SEPARATOR  "|"),"|",1) as title'),
             //DB::raw('GROUP_CONCAT(title2) as title2'),
             //DB::binary("GROUP_CONCAT(title2) as title2"),
-            DB::raw('SUBSTRING_INDEX(GROUP_CONCAT(status ORDER BY created_at DESC),",",1) as status'),
-            DB::raw('SUBSTRING_INDEX(GROUP_CONCAT(source ORDER BY created_at DESC),",",1) as source'),
+            DB::raw('SUBSTRING_INDEX(GROUP_CONCAT(DISTINCT status ORDER BY created_at DESC SEPARATOR "|"),"|",1) as status'),
+            DB::raw('SUBSTRING_INDEX(GROUP_CONCAT(DISTINCT source ORDER BY created_at DESC SEPARATOR  "|"),"|",1) as source'),
+            DB::raw('SUBSTRING_INDEX(GROUP_CONCAT(DISTINCT description ORDER BY created_at DESC SEPARATOR  "|"),"|",1) as description'),
             DB::raw('GROUP_CONCAT(DISTINCT DATE(created_at) ORDER BY created_at DESC) as dates'),
             )
             ->where('user_id', $uid);

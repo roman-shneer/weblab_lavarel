@@ -12,21 +12,18 @@ import Enc from "../libraries/Enc";
 export default {
     name: 'EncText',
     data() {        
-        console.log('enc',this.encrypt_pass);
         return {
             value: this.val,            
         }
     },
     props: [
         'val',
-      
         'encrypt_pass',
         'encryptionStatus'
     ],
     methods: {
         
-        tryDecrypt() { 
-            
+        tryDecrypt() {             
             if (this.encryptionStatus == 2) { 
                 if (typeof this.encrypt_pass != 'undefined') {
                     this.value = Enc.decrypt(this.val, this.encrypt_pass);
@@ -52,5 +49,8 @@ export default {
 .encrypted{
     color:gray;
     filter: blur(3px);
+}
+.encrypted_false,.encrypted_true{
+    font-size: 0.7em;
 }
 </style>

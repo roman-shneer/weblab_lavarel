@@ -1,14 +1,22 @@
 const Helper = {
 
-    renderTimeDate:(datetime:string) => {        
+    renderTimeDate:(datetime:string, condition:string | null = null) => {        
         let date = datetime.split(' ')[0].split('-').reverse().join('-');
         let time = datetime.split(' ')[1].substring(0, 5);
-        return time + ' ' + date;
+        if (condition == null) { 
+            return time + ' ' + date;
+        }
+        if (condition == 'date') { 
+            return date;
+        }
+        if (condition == 'time') { 
+            return time;
+        }
     },
 
-    date: (datetime:string) => { 
+    date: (datetime:string|null=null) => { 
         let date = new Date();
-        if (typeof datetime!='undefined') {
+        if (datetime!=null) {
             date = new Date(datetime);
         }
         let day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate();
@@ -17,9 +25,9 @@ const Helper = {
         return year + '-' + month + '-' + day;
     },
 
-    time: (datetime:string) => { 
+    time: (datetime:string|null=null) => { 
         let date = new Date();
-        if (typeof datetime != 'undefined') {
+        if (datetime!=null) {
             date = new Date(datetime);
         }
         let hours = date.getHours() < 10 ? '0' + date.getHours() : date.getHours();
