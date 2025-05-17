@@ -8,7 +8,7 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/sass/app.scss',
-                'resources/js/app.js',
+                'resources/js/app.ts',
             ],
             refresh: true,
         }),
@@ -29,8 +29,8 @@ export default defineConfig({
         },
     },
     server: {
-        cors: true, // Enable CORS
-        origin: 'https://weblab_lavarel.test:5173', // Set the origin      
+        // cors: true, // Enable CORS
+        //origin: 'https://weblab_lavarel.test:5173', // Set the origin      
 
     },
 });

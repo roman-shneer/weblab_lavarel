@@ -95,7 +95,6 @@ export default {
         let source = editItem.source;
 
         if (this.subitems.length > 0) {
-            console.log('data', this.subitems[0].title);
             exp_number = this.subitems[0].exp_number;
             title = this.subitems[0].title;
             status = this.subitems[0].status;

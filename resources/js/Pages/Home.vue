@@ -180,7 +180,6 @@ export default {
             
             if (this.encrypted_example) {
                 if (Enc.decrypt(this.encrypted_example, password) == 'test') {
-                    console.log('set correct password', password, this.encrypted_example, Enc.decrypt(this.encrypted_example, this.encrypt_pass));
                     this.encrypt_pass = password;
                     this.encryptionStatus = 2;
                     localStorage.setItem('encrypt_pass', this.encrypt_pass);
@@ -195,7 +194,6 @@ export default {
             if (text.length > 50) { 
                 text = text.substring(0, 50) + '...';
             }
-            console.log(text, text.length);
             return text;
         }
 

@@ -17,9 +17,10 @@ const dataDecryptedOffClass = "red";
             <div v-if="showPassForm||encryptionStatus==1">
                 <div v-if="encryptionStatus==1">
                     Your data encrypted&nbsp;<br/>
-                    Set password to unlock:
+                    Set password:
                     <input type="password" class="password" placeholder="your encrypt password" v-model="password" @change="setEncryptPass"/>
                     <button class="material-symbols-outlined color-w" @click="dropPass">close</button>
+                    <button @click="decrypt" class="decrypt-btn">Unlock</button>
                 </div>
                 <div v-if="encryptionStatus==2">
                     Your data already decrypted <button  @click="dropPass" class="reg_link">Lock</button>
@@ -43,12 +44,14 @@ export default {
     },
     methods: {
         setEncryptPass(evt:any) { 
-            console.log('header setEncryptPass',evt.target.value);
-            this.$emit('setEncryptPass', evt.target.value);
+            this.password = evt.target.value;            
+        },
+        decrypt() { 
+            this.$emit('setEncryptPass', this.password);
         },
         dropPass() { 
             this.password='';
-            this.$emit('setEncryptPass', '');
+            
         }
     },
     components:{ 
@@ -97,6 +100,13 @@ header h1{
 .reg_link{
     color:lightblue;
     text-decoration: underline;
+}
+.decrypt-btn{
+    background: green;
+    color:white;
+    padding:1px 4px;
+    border-radius: 3px;
+    margin-left:20px;
 }
 
 @media only screen and (max-width: 600px) {   

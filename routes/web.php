@@ -23,7 +23,6 @@ Route::get('/home', function () {
     $statuses = explode(",", $statuses);
     $statuses = array_map('trim', $statuses);
     $userEnc = Setting::factory()->is_user_encrypted($uid);
-
     return Inertia\Inertia::render('Home', [
         'statuses' => $statuses,
         'encrypted' => !empty($userEnc),
