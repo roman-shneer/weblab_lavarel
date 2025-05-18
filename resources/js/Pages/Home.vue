@@ -253,7 +253,7 @@ export default {
                         </td>
                         <td class="mobile-hide">
                             <a href="javascript://">
-                                <EncText :val="cutDescription(item.description)"  :encryptionStatus="encryptionStatus" :encrypt_pass="encrypt_pass"></EncText>
+                                <EncText :val="item.description" :cut="50"  :encryptionStatus="encryptionStatus" :encrypt_pass="encrypt_pass"></EncText>
                             </a>
                         </td>
                        
@@ -286,6 +286,7 @@ export default {
 body {
     padding: 0;
     margin: 0;
+    background-color: #f2f2f2;
 }
 
 .btn {

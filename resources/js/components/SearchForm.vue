@@ -69,6 +69,11 @@ export default {
 .search-cell{
     margin-right: 2%;
 }
+.search-cell input[type="text"],input[type="number"],input[type="date"]{
+    color:blue;
+    background-color: white;
+    border:solid gray 1px;
+}
 .search-x{
     padding:0 5px;
     background: transparent;

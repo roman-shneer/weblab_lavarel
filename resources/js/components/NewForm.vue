@@ -7,72 +7,75 @@ const $emit = defineEmits(["closeForm","renderTimeDate"]);
     <div id="edit-form">
         <button class="f-right material-symbols-outlined color-w" @click="$emit('closeForm')">close</button>
         <h5>Add/Edit Item</h5>      
-        <table class="table-edit">
-            <tbody>
-                <tr>
-                    <td>Exp. Id</td>
-                    <td>
-                        <input type="text" name="exp_number" @change="change_value" :value="state.exp_number" class="input" placeholder="Numbers,comma separated"/>
-                        <div class="note">can be few, comma separated</div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Title</td>
-                    <td>
-                        <input type="text" name="title" @change="change_value" :value="state.title" class="input"/>
-                        <div class="note">use short names</div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Description</td>
-                    <td>
-                        <textarea name="description" @change="change_value" :value="state.description" class="input"></textarea>
-                        <div class="note">Full name and processes</div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Date</td>
-                    <td>
-                        <input type="date"  name="date" @change="change_value" :value="state.date" />
-                        <input type="time"  name="time" @change="change_value" :value="state.time" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>Status</td>
-                    <td>
-                        <SelectStatus :statuses="statuses" v-model="state.status" @change="change_value" :value="state.status"></SelectStatus>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Source</td>
-                    <td><input type="text" name="source" @change="change_value"  :value="state.source" class="input"/></td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <button class="btn f-left" @click="save">Save</button>
-                        <button class="btn bred f-right" @click="deleteTask" v-if="state.id>0">Delete</button>
-                    </td>                    
-                </tr>
-            </tbody>
-        </table>
-        <ul class="subitems">
-            <li v-for="(item, index) in subitems" :key="index" v-bind:class = "(state.id==item.id)?'active_subitem':''" @click="changeActiveSubitem(item.id)">
-                <div>   
-                    <span class="subitem-datetime nowrap">
-                        {{Helper.renderTimeDate(item.datetime).split(' ')[0]}}                                              
-                        <div><b>{{Helper.renderTimeDate(item.datetime).split(' ')[1]}}</b></div>
-                    </span>                 
-                    <span>
-                        {{item.title}}                
-                    </span>                      
-                    <span>{{statuses[item.status]}}</span>               
-                </div>                
-                <div class="description">
-                    {{item.description}}
-                </div>
-            </li>
-            <li v-if="subitems.length==0">No subitems</li>
-        </ul>
+        <div class="overfloweble">
+            <table class="table-edit">
+                <tbody>
+                    <tr>
+                        <td>Exp. Id</td>
+                        <td>
+                            <input type="text" name="exp_number" @change="change_value" :value="state.exp_number" class="input" placeholder="Numbers,comma separated"/>
+                            <div class="note">can be few, comma separated</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Title</td>
+                        <td>
+                            <input type="text" name="title" @change="change_value" :value="state.title" class="input"/>
+                            <div class="note">use short names</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Description</td>
+                        <td>
+                            <textarea name="description" @change="change_value" :value="state.description" class="input"></textarea>
+                            <div class="note">Full name and processes</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Date</td>
+                        <td>
+                            <input type="date"  name="date" @change="change_value" :value="state.date" />
+                            <input type="time"  name="time" @change="change_value" :value="state.time" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Status</td>
+                        <td>
+                            <SelectStatus :statuses="statuses" v-model="state.status" @change="change_value" :value="state.status"></SelectStatus>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Source</td>
+                        <td><input type="text" name="source" @change="change_value"  :value="state.source" class="input"/></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <button class="btn f-left" @click="save">Save</button>
+                            <button class="btn bred f-right" @click="deleteTask" v-if="state.id>0">Delete</button>
+                        </td>                    
+                    </tr>
+                </tbody>
+            </table>
+            <ul class="subitems" v-if="subitems.length>0">
+                <li v-for="(item, index) in subitems" :key="index" v-bind:class = "(state.id==item.id)?'active_subitem':''" @click="changeActiveSubitem(item.id)">
+                    <div>   
+                        <span class="subitem-datetime nowrap">
+                            {{Helper.renderTimeDate(item.datetime).split(' ')[0]}}                                              
+                            <div><b>{{Helper.renderTimeDate(item.datetime).split(' ')[1]}}</b></div>
+                        </span>                 
+                        <span>
+                            {{item.title}}                
+                        </span>                      
+                        <span>{{statuses[item.status]}}</span>               
+                    </div>                
+                    <div class="description">
+                        {{item.description}}
+                    </div>
+                </li>
+                <li v-if="subitems.length==0">No subitems</li>
+            </ul>
+        </div>
+        
     </div>
     <div class="dark-layer"></div>
 </template>
@@ -141,7 +144,6 @@ export default {
     components: {
         SelectStatus,
     },
-    
 
 }
 </script>
@@ -157,8 +159,9 @@ export default {
     margin:5px;
 }
 .subitems li{
-
-    border-bottom:solid #ccc 1px;
+    margin:1px 1px 15px 1px;
+    box-shadow: 0px 0px 5px 1px #656060;
+    padding:2px;
 }
 .subitems li div span{
     display: inline-block;
@@ -178,6 +181,9 @@ export default {
 .active_subitem{
     background: floralwhite;
 }
+.active_subitem .description{
+    background: floralwhite;
+}
 #edit-form{
     border:solid black 1px;
     width:50vw;
@@ -187,12 +193,16 @@ export default {
     z-index: 1;
     background: #fff;    
     height:90vh;
-    overflow-y: auto;
+   
 }
 #edit-form h5{
     background: dimgray;
     color:#FFF;
     text-align: center;
+}
+.overfloweble{
+    overflow-y: auto;
+    height:85vh;
 }
 .table-edit input[type="text"],
 .table-edit input[type="number"],
@@ -234,8 +244,12 @@ export default {
 .description{
     white-space: pre-wrap;
     padding:5px 0px 5px 5px;
-    border-top:dashed #ccc 1px;
+    border:dotted #ccc 1px;
     background: whitesmoke;
+    font-style: italic;
+    font-size: medium;
+    margin:5px;
+    border-radius: 5px;
 }
 .dark-layer{
     background: gray;

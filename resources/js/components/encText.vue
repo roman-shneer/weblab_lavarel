@@ -19,20 +19,27 @@ export default {
     props: [
         'val',
         'encrypt_pass',
-        'encryptionStatus'
+        'encryptionStatus',
+        'cut'
     ],
     methods: {
         
         tryDecrypt() {             
-            if (this.encryptionStatus == 2) { 
-                if (typeof this.encrypt_pass != 'undefined') {
-                    this.value = Enc.decrypt(this.val, this.encrypt_pass);
-                } else { 
-                    //its fake
-                    this.value = this.val;
-                }
-                
+            let newValue = this.val;
+            if (this.encryptionStatus == 2 && typeof this.encrypt_pass != 'undefined') { 
+                newValue = Enc.decrypt(this.val, this.encrypt_pass);
             }
+            if (typeof this.cut != 'undefined') { 
+                newValue = this.cutDescription(newValue, this.cut);
+            }           
+            this.value = newValue;
+        },
+        
+        cutDescription(text: string, max:number) { 
+            if (text.length > max) { 
+                text = text.substring(0, max) + '...';
+            }
+            return text;
         }
 
     },
