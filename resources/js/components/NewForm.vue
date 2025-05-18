@@ -217,7 +217,7 @@ export default {
 }
 
 .table-edit input[type="time"]{
-    width: 40%;
+    width: 42%;
 }
 
 .table-edit{
