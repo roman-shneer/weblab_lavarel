@@ -20,17 +20,11 @@ export default defineConfig({
                 },
             },
         }),
-        /* basicSsl()*/
     ],
     resolve: {
         alias: {
             vue: 'vue/dist/vue.esm-bundler.js',
             ziggy: path.resolve('vendor/tightenco/ziggy/dist'),
         },
-    },
-    server: {
-        // cors: true, // Enable CORS
-        //origin: 'https://weblab_lavarel.test:5173', // Set the origin      
-
     },
 });
